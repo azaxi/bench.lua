@@ -10,12 +10,12 @@ On NodeMCU disable init.lua, reset and run or compile to bench.lc with full heap
 compiler will run out of memory. Then reenable init.lua and reset.
 
 Some results collected below
-                            dummy   	float_mul	write file	read file	note
-Intel i5-4590S 3GHz			28.1MC/s	26.9MC/s	36MB/s		256MB/s		Lua 5.1, Win7, SSD ADATA SU800
-NodeMCU @ 80MHz             126kC/s    	83kC/s		44kB/s		574kB/s		Lua 5.1, NodeMCU 3.0.0.0 float
-NodeMCU @ 160MHz            252kC/s    	168kC/s		48kB/s		973kB/s		Lua 5.1, NodeMCU 3.0.0.0 float
-Linksys EA4500              2.03MC/s   	1.5MC/s		21MB/s		49MB/s		Lua 5.1, OpenWrt 22.03.3
-Pixel 1						12.3MC/s	10.3MC/s	75MB/s		440MB/s		Lua 5.1, Android 10, Termux 1.37.0
+                            dummy       float_mul   write file  read file   note
+Intel i5-4590S 3GHz	        28.1MC/s    26.9MC/s    36MB/s      256MB/s     Lua 5.1, Win7, SSD ADATA SU800
+NodeMCU @ 80MHz             126kC/s     83kC/s	    44kB/s      574kB/s     Lua 5.1, NodeMCU 3.0.0.0 float
+NodeMCU @ 160MHz            252kC/s     168kC/s	    48kB/s      973kB/s     Lua 5.1, NodeMCU 3.0.0.0 float
+Linksys EA4500              2.03MC/s    1.5MC/s	    21MB/s      49MB/s      Lua 5.1, OpenWrt 22.03.3
+Pixel 1                     12.3MC/s    10.3MC/s    75MB/s      440MB/s     Lua 5.1, Android 10, Termux 1.37.0
 
 TODO: cleanup this script
 
@@ -58,94 +58,94 @@ String enhancement library
 -- Convert string into array, see JavaScript String.split
 -- Default comma separator
 -- It wont work if separator contains '%'
-string_split = function (str, sep)
-	sep = string.gsub(sep or ',', '%%', '%%')
-	str = str .. sep
-	local pattern = "(.-)" .. sep:gsub('%.', '%%.')
-	local t = {}
-	for s in string.gmatch(str, pattern) do
-		table.insert(t, s)
-	end
-	return t
+local string_split = function (str, sep)
+    sep = string.gsub(sep or ',', '%%', '%%')
+    str = str .. sep
+    local pattern = "(.-)" .. sep:gsub('%.', '%%.')
+    local t = {}
+    for s in string.gmatch(str, pattern) do
+        table.insert(t, s)
+    end
+    return t
 end
 
 -- Simple repr()
-function repr(val)
-	local map = {
-		["boolean"] = tostring,
-		["string"]  = function(v) return '"'..string.gsub(v,'"','\\"')..'"' end,
-		["number"]  = tostring,
-		["table"] 	= function() return "{}" end,
-		["function"] = tostring,
-		["nil"] 	= tostring
-	}
-	if map[type(val)] == nil then return '<' .. type(val) .. '>' end
-	return map[type(val)](val)
+local function repr(val)
+    local map = {
+        ["boolean"] = tostring,
+        ["string"]  = function(v) return '"'..string.gsub(v,'"','\\"')..'"' end,
+        ["number"]  = tostring,
+        ["table"] 	= function() return "{}" end,
+        ["function"] = tostring,
+        ["nil"] 	= tostring
+    }
+    if map[type(val)] == nil then return '<' .. type(val) .. '>' end
+    return map[type(val)](val)
 end
 
 -- convenient wrapper for string.format
-function sprintf (str, ...)	
-	if _VERSION >= "Lua 5.2" then
-		return string.format(str,table.unpack(arg))
-	end
-	return string.format(str,unpack(arg))
+local function sprintf (str, ...)	
+    if _VERSION >= "Lua 5.2" then
+        return string.format(str,table.unpack(arg))
+    end
+    return string.format(str,unpack(arg))
 end
 
 -- sprintf + expansion of variables
 -- expandVars(str) 			-> expand (A) environment and globals, e.g. $_G.varname or `_E.varname:format`
 -- expandVars(str,vars)		-> expand (A) + local variables from table 'vars', e.g. `varname:format`
 
-function expandVars (str, ...)
-	local vars = {}
-	while (arg.n == 1) and (type(arg[1]) == "table") and (type(arg[1][1]) ~= "nil") do arg = arg[1] end
-	if type(arg[1]) == "table" then
-		vars = arg[1]
-		table.remove(arg, 1)
-		arg.n = arg.n - 1
-	end
-	local function formatSingle(fmt, val)
+local function expandVars (str, ...)
+    local vars = {}
+    while (arg.n == 1) and (type(arg[1]) == "table") and (type(arg[1][1]) ~= "nil") do arg = arg[1] end
+    if type(arg[1]) == "table" then
+        vars = arg[1]
+        table.remove(arg, 1)
+        arg.n = arg.n - 1
+    end
+    local function formatSingle(fmt, val)
 --debugPrintf("formatSingle:", fmt, val)
-		if string.find(fmt, '[xXdD]') then val=math.floor(tonumber(val)) end
-		return string.format(fmt, val)
-	end
-	local function expandSingle(str)
-		local fmt = "%s"
-		if str:sub(1,1) == '`' then
-			str = str:sub(2,#str-1)
-		else
-			str = str:sub(2,#str)
-		end
-		local key = str
-		local a = string_split(str, ':')
-		if #a > 1 then key = a[1] fmt = '%'..a[2] end
+        if string.find(fmt, '[xXdD]') then val=math.floor(tonumber(val)) end
+        return string.format(fmt, val)
+    end
+    local function expandSingle(str)
+        local fmt = "%s"
+        if str:sub(1,1) == '`' then
+            str = str:sub(2,#str-1)
+        else
+            str = str:sub(2,#str)
+        end
+        local key = str
+        local a = string_split(str, ':')
+        if #a > 1 then key = a[1] fmt = '%'..a[2] end
 --debugPrintf("format:", fmt)
-		if vars[key] ~= nil then return formatSingle(fmt, vars[key]) end
+        if vars[key] ~= nil then return formatSingle(fmt, vars[key]) end
 --~ 		if key:sub(1,3) == '_G.' then key = key:sub(4,#str) return formatSingle(fmt, _G[key]) end
-		if _G[key] ~= nil then return formatSingle(fmt, _G[key]) end
+        if _G[key] ~= nil then return formatSingle(fmt, _G[key]) end
 --~ 		if key:sub(1,3) == '_E.' then key = key:sub(4,#str) return formatSingle(fmt, os.getenv(key)) end
-		if os.getenv(key) ~= nil then return formatSingle(fmt, os.getenv(key)) end
-		return "<nil>"
-	end
-	str = string.gsub(str, "%$[A-Za-z0-9_.:]+", expandSingle)
-	str = string.gsub(str, "`.+`", expandSingle)
-	if arg.n > 0 then
-		if _VERSION >= "Lua 5.2" then
-			str = string.format(str,table.unpack(arg))
-		end
-		str = string.format(str,unpack(arg))
-	end
-	return str
+        if os.getenv(key) ~= nil then return formatSingle(fmt, os.getenv(key)) end
+        return "<nil>"
+    end
+    str = string.gsub(str, "%$[A-Za-z0-9_.:]+", expandSingle)
+    str = string.gsub(str, "`.+`", expandSingle)
+    if arg.n > 0 then
+        if _VERSION >= "Lua 5.2" then
+            str = string.format(str,table.unpack(arg))
+        end
+        str = string.format(str,unpack(arg))
+    end
+    return str
 end
 
 
-function printf (str, ...)
-	str = expandVars(str, arg)
+local function printf (str, ...)
+    str = expandVars(str, arg)
 --~ 	if not ISCGI then
-	if IsNodeMCU then
-		print(str)
-	else
-		io.write(str)
-	end
+    if IsNodeMCU then
+        print(str)
+    else
+        io.write(str)
+    end
 --~ 	else
 --~ 		if Html == nil then Html = {} end
 --~ 		Html[#Html+1] = str
@@ -153,41 +153,41 @@ function printf (str, ...)
 end
 
 
-string_trim = function(str)
-	str = str:gsub("%s+$", "")
-	return str
+local string_trim = function(str)
+    str = str:gsub("%s+$", "")
+    return str
 end
 
-function exec(cmd)
-	local handle = io.popen(cmd)
-	local output = string_trim(handle:read("*a"))
-	handle:close()
-	handle = io.popen("echo $?")
-	local retval = tonumber(handle:read("*a"))
-	handle:close()
-	if 0 == retval then
-		return output
-	end
-	return ""
+local function exec(cmd)
+    local handle = io.popen(cmd)
+    local output = string_trim(handle:read("*a"))
+    handle:close()
+    handle = io.popen("echo $?")
+    local retval = tonumber(handle:read("*a"))
+    handle:close()
+    if 0 == retval then
+        return output
+    end
+    return ""
 end
 
-function cat (filepath)
+local function cat (filepath)
 --print("cat " .. filepath)
-	local f = io.open(filepath)
-	if f == nil then return "" end
-	local text = f:read("*a")
-	f:close()
-	return text
+    local f = io.open(filepath)
+    if f == nil then return "" end
+    local text = f:read("*a")
+    f:close()
+    return text
 end
 
-function getKeyValue(text,key)
-	local val = text:match('\n'..key..'="([^"]*)"')
-	return val
+local function getKeyValue(text,key)
+    local val = text:match('\n'..key..'="([^"]*)"')
+    return val
 end
 
-function getEtcOs(key)
-	EtcOsReleaseText = EtcOsReleaseText or '\n' .. cat("/etc/os-release")
-	return getKeyValue(EtcOsReleaseText,key)
+local function getEtcOs(key)
+    EtcOsReleaseText = EtcOsReleaseText or '\n' .. cat("/etc/os-release")
+    return getKeyValue(EtcOsReleaseText,key)
 end
 
 
@@ -216,7 +216,7 @@ local function init ()
                 IsAndroid = true
             else
                 IsLinux = true
-				IsOpenWrt = getEtcOs("NAME") == "OpenWrt"
+                IsOpenWrt = getEtcOs("NAME") == "OpenWrt"
             end
         end
     end
@@ -247,7 +247,7 @@ function testDummyCall()
     return math.floor(count*1000000/duration)
 end
 
-function testFloatMul()
+local function testFloatMul()
     local duration
     local start, count = getMicroTime(), 0
     local function float_mul(x) return 3.14159 * x end
@@ -267,7 +267,7 @@ function testWriteFile()
     local duration
     fs.remove(TEST_FILENAME)
     local maxsize = 1024*1024
-	if not (IsOpenWrt or IsNodeMCU) then maxsize = maxsize * 128 end
+    if not (IsOpenWrt or IsNodeMCU) then maxsize = maxsize * 128 end
     IoBlkSz = IsNodeMCU and 4096 or 65536
     local f = fs.open(TEST_FILENAME, "a")
     local start = getMicroTime()
@@ -301,14 +301,14 @@ function testWriteFile()
     until (IoFileSize >= maxsize) or (duration >= 2000000)
     f:flush()
     f:close()
-	duration = getMicroTime() - start
+    duration = getMicroTime() - start
     return math.floor(IoFileSize*1000/duration) -- kB/s
 end
 
    
 -- read file
 
-function testReadFile()
+local function testReadFile()
     local f = fs.open(TEST_FILENAME, "r")
     if not f then
         print("Test file does not exist")
