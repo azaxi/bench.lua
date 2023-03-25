@@ -11,7 +11,7 @@ compiler will run out of memory. Then reenable init.lua and reset.
 
 Some results collected below
                             dummy       float_mul   write file  read file   note
-Intel i5-4590S 3GHz	        28.1MC/s    26.9MC/s    36MB/s      256MB/s     Lua 5.1, Win7, SSD ADATA SU800
+Intel i5-4590S 3GHz         28.1MC/s    26.9MC/s    36MB/s      256MB/s     Lua 5.1, Win7, SSD ADATA SU800
 NodeMCU @ 80MHz             126kC/s     83kC/s	    44kB/s      574kB/s     Lua 5.1, NodeMCU 3.0.0.0 float
 NodeMCU @ 160MHz            252kC/s     168kC/s	    48kB/s      973kB/s     Lua 5.1, NodeMCU 3.0.0.0 float
 Linksys EA4500              2.03MC/s    1.5MC/s	    21MB/s      49MB/s      Lua 5.1, OpenWrt 22.03.3
