@@ -10,3 +10,13 @@ Strangely, test file sometimes fails to open, or write speed drops from 44kB/s t
 This is my first attempt at NodeMCU. I am bit late to ESP8266, but ended up with some quantity on hand and trying to make them useful. Even though community moved to other platforms, ESP8266 is now well documented and every possible problem has been encountered and mentioned.
 
 This benchmark is written with some extra code to run on other platforms so there is reference point.
+
+Some results collected below
+
+                                dummy       float_mul   write file  read file   note
+    NodeMCU @ 80MHz             126kC/s     83kC/s	    44kB/s      574kB/s     Lua 5.1, NodeMCU 3.0.0.0 float
+    NodeMCU @ 160MHz            252kC/s     168kC/s	    48kB/s      973kB/s     Lua 5.1, NodeMCU 3.0.0.0 float
+    Linksys EA4500              2.03MC/s    1.5MC/s	    21MB/s      49MB/s      Lua 5.1, OpenWrt 22.03.3
+    Pixel 1 Lua 5.1             12.3MC/s    10.3MC/s    75MB/s      440MB/s     Lua 5.1, Android 10, Termux 1.37.0
+    Pixel 1 Lua 5.4             15.9MC/s    15.6MC/s    67MB/s      280MB/s     Lua 5.4, Android 10, Termux 1.37.0
+    Intel i5-4590S 3GHz         28.1MC/s    26.9MC/s    36MB/s      256MB/s     Lua 5.1, Win7, SSD ADATA SU800
